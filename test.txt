@@ -1,1 +1,10 @@
-hello class
+hello world
+
+// This is a test file
+// with some comments
+// and a class definition
+class Test {
+    public static void main(String[] args) {
+        System.out.println("Hello, world!");
+    }
+}
