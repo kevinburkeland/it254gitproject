@@ -1,0 +1,238 @@
+// Test Lab 10.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+// Libraries
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+const int MAX_ACCOUNTS = 5;
+
+
+class BankAcct {
+private:
+    string name;
+    int accountNum;
+    double balance;
+public:
+    // What I want public to help me find stuff
+    BankAcct(string name, int accountNum, double balance) {
+        this->name = name;
+        this->accountNum = accountNum;
+        this->balance = balance;
+    }
+    // Getters
+    string getName() {
+        return name;
+    }
+    int getAccountNum() {
+        return accountNum;
+    }
+    double getBalance() {
+        return balance;
+    }
+    // Deposits
+    void deposit(double amount) {
+        balance += amount;
+    }
+    // Withdrawals
+    void withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            cout << "Withdawal was successful..." << endl;
+        }
+        else {
+            cout << "Insufficient funds..." << endl;
+        }
+
+    }
+};
+
+// Manage Accounts
+class BankingSystem {
+private:
+    vector<BankAcct> accounts;
+public:
+    // AddAccount function to add accounts
+    void addAccount(string name, int accountNum, double balance) {
+        if (accounts.size() < MAX_ACCOUNTS) {
+            accounts.push_back(BankAcct(name, accountNum, balance));
+        }
+        else {
+            cout << "Max accounts reached. Cannot add more accounts." << endl;
+        }
+
+    }
+    // ShowAccounts function to show all available accounts
+    void showAccounts() {
+        cout << "Account #:  \tAccount:\t\tBalance:\n";
+        for (auto& account : accounts) {
+            cout << left << setw(20) <<account.getAccountNum() << left << setw(20) << account.getName()
+            << setw(20) << fixed << setprecision(2) << account.getBalance() <<"\n";
+        }
+    }
+    // Find function to find accounts via account #
+    BankAcct* findAccount(int accountNum) {
+        for (auto& account : accounts){
+            if(account.getAccountNum()==accountNum){
+                return &account;
+            }
+        }
+        // If account isn't found
+        return NULL;
+    }
+    // Create transfer function between two accounts
+    void transfer(int fromAccountNum, int toAccountNum, double amount) {
+        BankAcct* fromAccount = findAccount(fromAccountNum);
+        BankAcct* toAccount = findAccount(toAccountNum);
+        if (fromAccount == NULL || toAccount == NULL) {
+            cout << "The accounts you have entered cannot be found." << endl;
+            return;
+        }
+        if (fromAccount->getBalance() >= amount) {
+            fromAccount->withdraw(amount);
+            toAccount->deposit(amount);
+            cout << "Successfully transferred $" << amount
+                << " from " << fromAccount->getName()
+                << " to " << toAccount->getName() << "."
+                << " The new balance of " << toAccount->getName() << " is $" << toAccount->getBalance()<<"." << endl;
+        }
+        else {
+            cout << "Insufficient funds in account " << fromAccountNum << "." << endl;
+        }
+    }
+    // Print function
+    void printAccounts() {
+        showAccounts();
+    }
+};
+
+int main()
+{
+
+    BankingSystem bank;
+
+    // Create a BankAcct array of size 10.
+    bank.addAccount("WECU", 100, 103.50);
+    bank.addAccount("USAA", 200, 199.00);
+    bank.addAccount("Harborstone", 300, 300.00);
+
+    char choice;
+
+    // Display screen
+    do {
+        cout << "\t\t    Jamil's WorldWide Bank" << endl;
+        cout << "\t\t ****************************" << endl;
+        cout << "\t\t\t   Main Menu" << endl;
+        cout << "\t\t ****************************" << endl;
+        cout << "\t\t (A)dd an Account" << endl;
+        cout << "\t\t (S)how all Accounts" << endl;
+        cout << "\t\t (D)eposit to an Account" << endl;
+        cout << "\t\t (W)ithdraw from an Account" << endl;
+        cout << "\t\t (T)ransfer between Accounts" << endl;
+        cout << "\t\t (Q)uit" << endl;
+        cout << "\t\t *****************************" << endl;
+        // Start of User Input
+        cout << "Please Enter Your Choice: ";
+        cin >> choice;
+        // Logic to decipher user input
+        switch (choice) {
+        default: {
+            cout << "Your selection was invalid. Please try again." << endl;
+            break;
+        }
+               // Quit
+        case 'q':
+        case 'Q': {
+            break;
+        }
+                // Add account
+        case 'a':
+        case 'A': {
+            string name;
+            int accountNum;
+            double balance = 0.00;
+            cout << "Enter your bank's name: ";
+            cin.ignore();
+            getline(cin,name);
+            cout << "Enter your account number: ";
+            cin >> accountNum;
+            cout << "Enter Initial Balance: ";
+            cin >> balance;
+            bank.addAccount(name, accountNum, balance);
+            cout << "Account was successfully created..." << endl;
+            cout << "$" << balance << " was added to your account." << endl << endl;
+            break;
+        }
+                // Show accounts
+        case 's':
+        case 'S': {
+            bank.printAccounts();
+            break;
+        }
+                // Deposit money
+        case 'd':
+        case 'D': {
+            int accountNum;
+            double amount;
+            cout << "Enter the Account Number to Deposit Money to: ";
+            cin >> accountNum;
+            BankAcct* account = bank.findAccount(accountNum);
+            if (account != NULL) {
+                cout << "Enter Amount to Deposit: ";
+                cin >> amount;
+                account->deposit(amount);
+                cout << "$"<< amount << " has been deposited to account number " << accountNum << "." << endl;
+                cout << "Your new balance is $" << account->getBalance() << endl;
+                break;
+            }
+            else {
+                cout << "That account cannot be found at this time." << endl;
+                break;
+            }
+        }
+                // Withdraw money
+        case 'w':
+        case 'W': {
+            int accountNum;
+            double amount;
+            cout << "Enter Account Number to Withdraw Money from: ";
+            cin >> accountNum;
+            BankAcct* account = bank.findAccount(accountNum);
+            if (account != NULL) {
+                cout << "Enter Amount to Withdraw: ";
+                cin >> amount;
+                account->withdraw(amount);
+                cout << "$"<<amount << " has been withdrawn from account number " << accountNum << "." << endl;
+                cout << "Your new balance is $" << account->getBalance() << endl;
+                break;
+            }
+            else {
+                cout << "That account cannot be found at this time." << endl;
+                break;
+            }
+        }
+                // Transfer between accounts
+        case 't':
+        case 'T': {
+            int fromAccountNum, toAccountNum;
+            double amount;
+            cout << "Enter the account number to transfer from: ";
+            cin >> fromAccountNum;
+            cout << "Enter the account number to transfer to: ";
+            cin >> toAccountNum;
+            cout << "Enter the amount you wish to transfer: ";
+            cin >> amount;
+            bank.transfer(fromAccountNum, toAccountNum, amount);
+            break;
+        }
+        }
+        // Ensure that user hasn't input 'q/Q'
+    } while (choice != 'q' && choice != 'Q');
+    
+    return 0;
+
+}
