@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# This script first outputs the classic phrase,
+# then pauses for a few seconds,
+# and finally adds an additional thought.
+
+# Print the initial farewell message.
+echo "So long and Thanks for all the fish"
+
+# Pause the script's execution for 2 seconds.
+# This creates a deliberate delay before the next line is displayed.
+sleep 2
+
+# Print the follow-up message.
+echo "and knowledge"
