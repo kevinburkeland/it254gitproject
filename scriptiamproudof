@@ -1,0 +1,38 @@
+#!/bin/bash
+#Set variables
+
+RESOURCE_GROUP="AwesomeVM"
+LOCATION="westus2"
+VM_NAME="awesomeVM"
+ADMIN_USER="azureuser"
+
+#Create Resource Group and VM
+az group create --name $RESOURCE_GROUP --location $LOCATION
+az vm create --resource-group $RESOURCE_GROUP --name $VM_NAME --image Ubuntu2204 --admin-username $ADMIN_USER --generate-ssh-keys --size Standard_B1s --public-ip-sku Standard --custom-data kickstarter.sh 
+
+#Create NSG and open ports with unique priorities
+NSG_NAME="${VM_NAME}-nsg"
+az network nsg create --resource-group $RESOURCE_GROUP --name $NSG_NAME
+
+#Fix: Add source address prefixes to NSG rules
+az network nsg rule create --resource-group $RESOURCE_GROUP --nsg-name $NSG_NAME --name AllowSSH --priority 100 --direction Inbound --access Allow --protocol Tcp --destination-port-ranges 22 --source-address-prefixes "0.0.0.0/0"
+az network nsg rule create --resource-group $RESOURCE_GROUP --nsg-name $NSG_NAME --name AllowHTTP --priority 110 --direction Inbound --access Allow --protocol Tcp --destination-port-ranges 80 --source-address-prefixes "0.0.0.0/0"
+
+#Associate NSG with VM NIC
+NIC_NAME=$(az vm show --resource-group $RESOURCE_GROUP --name $VM_NAME --query "networkProfile.networkInterfaces[0].id" --output tsv | awk -F '/' '{print $NF}')
+az network nic update --resource-group $RESOURCE_GROUP --name $NIC_NAME --network-security-group $NSG_NAME
+
+#Get Public IP
+PUBLIC_IP=$(az vm show --resource-group $RESOURCE_GROUP --name $VM_NAME --query "publicIpAddress" --output tsv)
+echo "VM Public IP: $PUBLIC_IP"
+
+#Wait for VM to initialize networking,
+echo "Waiting for VM to boot up..."
+echo "Public IP: $PUBLIC_IP"
+# Install dependencies for fetching script
+sudo apt update && sudo apt install -y curl
+
+# Install dependencies for fetching script
+sudo apt update && sudo apt install -y curl
+
+echo "All Done!"
