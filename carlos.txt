@@ -1,0 +1,103 @@
+#carlos jimenez python final november 11 2025
+
+import csv
+import turtle
+t = turtle.Pen()
+t.speed(0)
+
+file_path = r"C:\Users\Carlos\IT\stockIndex.csv"
+
+# Reading file into list
+stocks = []
+print("Reading file into list...")
+
+with open(file_path, "r") as csvfile:
+    csvreader = csv.reader(csvfile)
+    for row in csvreader:
+        stocks.append((int(row[0]), int(row[1])))  #Make all the data read as numbers
+
+#List of data as numbers
+print("The data in the list: ")
+print(stocks)
+
+print("Drawing the data...")
+
+#scaling numbers
+xScaling = 20  # Spaces between the days
+yScaling = 2   # Spaces between the prices
+xStart = -400  # Start graph all the way to the side
+yStart = -200  # Start graph lower down
+
+#move to starting point
+t.penup()
+xBegin = stocks[0][0] * xScaling + xStart  # Scale and start left - first row first colum day
+yBegin = stocks[0][1] * yScaling + yStart  # Scale and start lower - first row second colum price
+t.goto(xBegin, yBegin)  # Starting at the first day and price
+t.pendown()
+
+# Draw data lines
+for s in range(len(stocks) - 1):  # x = day & y = price
+    x1 = stocks[s][0] * xScaling + xStart #s/0 is day 1
+    y1 = stocks[s][1] * yScaling + yStart #s/2 is day 2
+
+    # Next point
+    x2 = stocks[s + 1][0] * xScaling + xStart #same but add a 1
+    y2 = stocks[s + 1][1] * yScaling + yStart
+
+    if y2 > y1:  # If the price is greater than the day before
+        t.pencolor("green")  # Price went up
+    else:
+        t.pencolor("red")    # Price went down
+
+    t.goto(x1, y1)
+    t.goto(x2, y2)
+
+print("Drawing the graph...")
+
+
+t.color("orange")
+t.penup()
+t.goto(xStart, yStart)
+t.pendown()
+t.left(90)  # Draw y-axis
+t.forward(400)
+t.back(400)
+t.right(90)  # Draw x-axis
+t.forward(640)
+
+#ticks for x axis
+for ti in range(len(stocks)):
+    xTick = stocks[ti][0] * 21 + xStart #day 
+    t.penup()
+    t.goto(xTick, yStart)  # Position for the tick
+    t.pendown()
+    t.goto(xTick, yStart - 10)  # Draw the tick
+    t.penup()
+    t.goto(xTick, yStart - 25)  # Position for the label
+    t.write(str(stocks[ti][0]), align="center", font=("Arial", 8, "normal"))
+
+#ticks for y axis
+for i in range(0, 201, 20):  # Example: range from 0 to 200 with step of 20
+    yTick = i * yScaling + yStart
+    t.penup()
+    t.goto(xStart, yTick)  # Position for the tick
+    t.pendown()
+    t.goto(xStart - 10, yTick)  # Draw the tick
+    t.penup()
+    t.goto(xStart - 25, yTick - 5)  # Position for the label
+    t.write(str(i), align="center", font=("Arial", 8, "normal"))
+
+#labels
+t.color("purple")
+t.penup()
+t.goto(xStart + 640 / 2, yStart - 50)  #x axis
+t.write("Days", align="center", font=("Arial", 12, "bold"))
+
+t.color("purple")
+t.penup() #y axis
+t.goto(xStart - 60, yStart + 400 / 2)  
+t.setheading(0)  
+t.write("Price", align="center", font=("Arial", 12, "bold"))
+
+t.hideturtle()
+turtle.done()
